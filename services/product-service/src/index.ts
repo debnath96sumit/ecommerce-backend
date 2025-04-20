@@ -20,7 +20,7 @@ const start = async () => {
   await dbConnect();
 
   app.listen(PORT, () => {
-    console.log(`🚀 Product Service running ooooooooooooooon port ${PORT}`);
+    console.log(`🚀 Product Service running on port ${PORT}`);
   });
 };
 
