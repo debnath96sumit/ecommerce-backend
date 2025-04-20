@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  product-service:
+    build: ./services/product-service
+    ports:
+      - '4001:4001'
+    env_file:
+      - ./services/product-service/.env
+    depends_on:
+      - mongo
+    volumes:
+      - ./services/product-service:/app
+      - /app/node_modules  
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://product-service:4001/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: npm run dev 
+    networks:
+      - ecommerce-net
+
+  user-service:
+    build: ./services/user-service
+    ports:
+      - '4002:4002'
+    env_file:
+      - ./services/user-service/.env
+    depends_on:
+      - mongo
+    volumes:
+      - ./services/user-service:/app
+      - /app/node_modules
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://user-service:4002/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: npm run dev
+    networks:
+      - ecommerce-net
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - ecommerce-net
+
+networks:
+  ecommerce-net:
+
+volumes:
+  mongo_data:
