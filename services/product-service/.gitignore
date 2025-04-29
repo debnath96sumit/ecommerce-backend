@@ -17,6 +17,7 @@ jenkin.sh
 port.txt
 log/
 dist
+dist/*
 coverage
 logs
 src/logs*
