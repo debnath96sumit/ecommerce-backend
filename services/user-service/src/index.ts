@@ -2,7 +2,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import dbConnect from './config/dbConnect';
-
+import userRoutes from './routes/user.routes';
 dotenv.config();
 
 const app = express();
@@ -10,6 +10,7 @@ const PORT = process.env.PORT ?? 4002;
 
 app.use(express.json());
 
+app.use('/api/users', userRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.send({ message: 'User service is healthy' });
