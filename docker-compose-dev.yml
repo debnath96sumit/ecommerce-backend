@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   product-service:
-    build: ./services/product-service
+    build: 
+      context: ./services/product-service
+      dockerfile: Dockerfile
     ports:
       - '4001:4001'
     env_file:
@@ -11,7 +13,6 @@ services:
       - mongo
     volumes:
       - ./services/product-service:/app
-      - /app/node_modules  
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://product-service:4001/api/health"]
       interval: 10s
@@ -22,7 +23,9 @@ services:
       - ecommerce-net
 
   user-service:
-    build: ./services/user-service
+    build: 
+      context: ./services/user-service
+      dockerfile: Dockerfile
     ports:
       - '4002:4002'
     env_file:
@@ -31,7 +34,6 @@ services:
       - mongo
     volumes:
       - ./services/user-service:/app
-      - /app/node_modules
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://user-service:4002/api/health"]
       interval: 10s
