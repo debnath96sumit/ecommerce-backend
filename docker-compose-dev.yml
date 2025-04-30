@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   product-service:
+    container_name: ecommerce-product-service
     build: 
       context: ./services/product-service
       dockerfile: Dockerfile
@@ -23,6 +24,7 @@ services:
       - ecommerce-net
 
   user-service:
+    container_name: ecommerce-user-service
     build: 
       context: ./services/user-service
       dockerfile: Dockerfile
