@@ -6,4 +6,8 @@ export interface IUser extends Document {
     password: string;
     role: mongoose.Types.ObjectId;
     refreshToken?: string;
+    refreshTokenExpiry?: Date;
+    matchPassword: (enteredPass: string) => Promise<boolean>;
+    generateRefreshToken: () => Promise<string>;
+    invalidateRefreshToken: () => Promise<void>;
 }
