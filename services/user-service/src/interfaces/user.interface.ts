@@ -4,5 +4,6 @@ export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
-    role: mongoose.Types.ObjectId
+    role: mongoose.Types.ObjectId;
+    refreshToken?: string;
 }
