@@ -3,8 +3,15 @@ import User from '../models/User';
 import { userRegisterSchema } from '../validations/user.validation';
 import { JWT_SECRET } from '../config';
 import jwt from 'jsonwebtoken';
+import { AuthenticatedRequest } from '../interfaces';
+import { UserRepository } from '../repositories/user.repository';
 
 class UserController {
+    private readonly userRepo: UserRepository;
+    constructor(){
+        this.userRepo = new UserRepository();
+    }
+
     public async createUser(req: Request, res: Response) {
         const {error, value} = userRegisterSchema.validate(req.body);
         if (error) {
@@ -40,14 +47,12 @@ class UserController {
             return;
         }
 
-        // Generate access token (short-lived)
         const accessToken = jwt.sign(
             { id: user._id, role: user.role },
             JWT_SECRET,
-            { expiresIn: '15m' } // Access token expires in 15 minutes
+            { expiresIn: '15m' }
         );
 
-        // Generate refresh token
         const refreshToken = await user.generateRefreshToken();
 
         res.status(200).json({ 
@@ -61,6 +66,22 @@ class UserController {
       }
     }
 
+    public getProfile = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const user = await this.userRepo.findOne({ _id: req?.user?.id });
+            if(!user){
+                res.status(404).json({success: false, message: 'User not found'});
+                return;
+            }
+            res.status(200).json({success: true, user});
+            return;
+        } catch (error) {
+            console.log("error", error);
+            res.status(500).json({success: false, message: 'Error user profile'});
+            return;
+        }
+    }
+
     public async refreshToken(req: Request, res: Response) {
         try {
             const { refreshToken } = req.body;
@@ -69,7 +90,6 @@ class UserController {
                 return;
             }
 
-            // Verify refresh token
             const decoded = jwt.verify(refreshToken, JWT_SECRET) as { id: string };
             const user = await User.findById(decoded.id);
 
@@ -78,11 +98,10 @@ class UserController {
                 return;
             }
 
-            // Generate new access token
             const accessToken = jwt.sign(
                 { id: user._id, role: user.role },
                 JWT_SECRET,
-                { expiresIn: '15m' } // Access token expires in 15 minutes
+                { expiresIn: '15m' } 
             );
 
             res.status(200).json({ 

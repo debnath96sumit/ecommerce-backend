@@ -4,7 +4,10 @@ import { JWT_SECRET } from "../config";
 
 export const verifyToken = (req: any, res: Response, next: NextFunction) =>{
     let token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({message: 'Not authorized'});
+    if (!token) {
+        res.status(401).json({message: 'Not authenticated'});
+        return;
+    }
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET) as any;
@@ -12,6 +15,7 @@ export const verifyToken = (req: any, res: Response, next: NextFunction) =>{
         next();
     } catch (error) {
         console.log(error);
-        return res.status(401).json({message: 'Token invalid'});
+        res.status(401).json({message: 'Token invalid'});
+        return;
     }
 }
