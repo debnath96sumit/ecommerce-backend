@@ -7,11 +7,11 @@ import { InitializeBroker } from './services/BrokerService';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT ?? 4002;
+const PORT = process.env.PORT ?? 4001;
 
 app.use(express.json());
 
-app.use('/api/users', userRoutes);
+app.use('/api/user', userRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.send({ message: 'User service is healthy' });

@@ -1,35 +1,32 @@
 version: '3.8'
 
 services:
-  product-service:
-    container_name: ecommerce-product-service
-    build: 
-      context: ./services/product-service
+  gateway:
+    container_name: api-gateway
+    build:
+      context: ./gateway
       dockerfile: Dockerfile
     ports:
-      - '4001:4001'
+      - '5000:5000'
     env_file:
-      - ./services/product-service/.env
+      - ./gateway/.env
     depends_on:
-      - mongo
+      user-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
     volumes:
-      - ./services/product-service:/app
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://product-service:4001/api/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    command: npm run dev 
+      - ./gateway:/app
     networks:
       - ecommerce-net
-
+  
   user-service:
     container_name: ecommerce-user-service
     build: 
       context: ./services/user-service
       dockerfile: Dockerfile
     ports:
-      - '4002:4002'
+      - '4001:4001'
     env_file:
       - ./services/user-service/.env
     depends_on:
@@ -37,11 +34,33 @@ services:
     volumes:
       - ./services/user-service:/app
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://user-service:4002/api/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://user-service:4001/api/health"]
       interval: 10s
       timeout: 5s
       retries: 5
     command: npm run dev
+    networks:
+      - ecommerce-net
+      
+  product-service:
+    container_name: ecommerce-product-service
+    build: 
+      context: ./services/product-service
+      dockerfile: Dockerfile
+    ports:
+      - '4002:4002'
+    env_file:
+      - ./services/product-service/.env
+    depends_on:
+      - mongo
+    volumes:
+      - ./services/product-service:/app
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://product-service:4002/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: npm run dev 
     networks:
       - ecommerce-net
 
@@ -52,6 +71,33 @@ services:
       - '27017:27017'
     volumes:
       - mongo_data:/data/db
+    networks:
+      - ecommerce-net
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - ecommerce-net
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092" 
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    
     networks:
       - ecommerce-net
 
