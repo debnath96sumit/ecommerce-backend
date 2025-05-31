@@ -8,81 +8,86 @@ import { UserRepository } from '../repositories/user.repository';
 
 class UserController {
     private readonly userRepo: UserRepository;
-    constructor(){
+    constructor() {
         this.userRepo = new UserRepository();
     }
 
     public async createUser(req: Request, res: Response) {
-        const {error, value} = userRegisterSchema.validate(req.body);
+        const { error, value } = userRegisterSchema.validate(req.body);
         if (error) {
             res.status(400).json({ message: error.details[0].message });
             return;
         }
         try {
-            const existUser = await User.findOne({ email: value.email}).exec();
-            if(existUser) {
+            const existUser = await User.findOne({ email: value.email }).exec();
+            if (existUser) {
                 res.status(400).json({ message: 'User already exists' });
                 return;
             }
             const user = new User(value);
             await user.save();
-            
+
             res.status(201).json({ message: 'User created successfully', user });
         } catch (error: any) {
             res.status(500).json({ message: 'Error creating user', error: error.message });
         }
     };
 
-    public async login(req: Request, res: Response) {
-      try {
-        const {email, password} = req.body;
-        const user = await User.findOne({ email }).exec();
-        if (!user) {
-            res.status(400).json({ message: 'Invalid email or password' });
-            return;
+    public login = async (req: Request, res: Response) => {
+        try {
+            const { email, password } = req.body;
+            const user = await this.userRepo.findOne({ email });
+            if (!user) {
+                res.status(400).json({ message: 'Invalid email or password' });
+                return;
+            }
+            const isMatch = await user.matchPassword(password);
+            if (!isMatch) {
+                res.status(400).json({ message: 'Invalid email or password' });
+                return;
+            }
+            
+            const accessToken = jwt.sign(
+                {
+                    id: user._id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                },
+                JWT_SECRET,
+                { expiresIn: '15m' }
+            );
+
+            const refreshToken = await user.generateRefreshToken();
+
+            res.status(200).json({
+                message: 'Login successful',
+                user,
+                accessToken,
+                refreshToken
+            });
+        } catch (error: any) {
+            res.status(500).json({ message: 'Error logging in', error: error.message });
         }
-        const isMatch = await user.matchPassword(password);
-        if (!isMatch) {
-            res.status(400).json({ message: 'Invalid email or password' });
-            return;
-        }
-
-        const accessToken = jwt.sign(
-            { id: user._id, role: user.role },
-            JWT_SECRET,
-            { expiresIn: '15m' }
-        );
-
-        const refreshToken = await user.generateRefreshToken();
-
-        res.status(200).json({ 
-            message: 'Login successful', 
-            user,
-            accessToken,
-            refreshToken
-        });
-      } catch (error: any) {
-          res.status(500).json({ message: 'Error logging in', error: error.message });
-      }
     }
 
     public getProfile = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const user = await this.userRepo.findOne({ _id: req?.user?.id });
-            if(!user){
-                res.status(404).json({success: false, message: 'User not found'});
+            if (!user) {
+                res.status(404).json({ success: false, message: 'User not found' });
                 return;
             }
-            res.status(200).json({success: true, user});
+            res.status(200).json({ success: true, user });
             return;
         } catch (error) {
             console.log("error", error);
-            res.status(500).json({success: false, message: 'Error user profile'});
+            res.status(500).json({ success: false, message: 'Error user profile' });
             return;
         }
     }
 
-    public async refreshToken(req: Request, res: Response) {
+    public refreshToken = async (req: Request, res: Response) => {
         try {
             const { refreshToken } = req.body;
             if (!refreshToken) {
@@ -91,23 +96,30 @@ class UserController {
             }
 
             const decoded = jwt.verify(refreshToken, JWT_SECRET) as { id: string };
-            const user = await User.findById(decoded.id);
+            const user = await this.userRepo.findOne({ _id: decoded.id });
 
             if (!user || !user.refreshToken || user.refreshToken !== refreshToken) {
                 res.status(401).json({ message: 'Invalid refresh token' });
                 return;
             }
-
+            console.log("user", user);
+            
             const accessToken = jwt.sign(
-                { id: user._id, role: user.role },
+                {
+                    id: user._id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                },
                 JWT_SECRET,
-                { expiresIn: '15m' } 
+                { expiresIn: '15m' }
             );
 
-            res.status(200).json({ 
-                message: 'Token refreshed successfully', 
+            res.status(200).json({
+                message: 'Token refreshed successfully',
                 accessToken
             });
+            return;
         } catch (error: any) {
             if (error.name === 'TokenExpiredError') {
                 res.status(401).json({ message: 'Refresh token has expired' });
@@ -121,16 +133,16 @@ class UserController {
         try {
             const { refreshToken } = req.body;
             if (!refreshToken) {
-              res.status(400).json({ message: 'Refresh token is required' });
-              return;
+                res.status(400).json({ message: 'Refresh token is required' });
+                return;
             }
 
             const decoded = jwt.verify(refreshToken, JWT_SECRET) as { id: string };
             const user = await User.findById(decoded.id);
 
             if (!user) {
-              res.status(400).json({ message: 'User not found' });
-              return;
+                res.status(400).json({ message: 'User not found' });
+                return;
             }
 
             await user.invalidateRefreshToken();

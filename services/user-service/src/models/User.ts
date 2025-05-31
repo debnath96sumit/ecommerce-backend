@@ -3,12 +3,14 @@ import { IUser } from "../interfaces/user.interface";
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from "../config";
+import Role from './Role';
+import { IRole } from '../interfaces/role.interface';
 
 const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true },
+    role: { type: mongoose.Schema.Types.ObjectId, ref: Role, required: true },
     password: { type: String, required: true },
     refreshToken: { type: String, default: null },
     refreshTokenExpiry: { type: Date, default: null },
@@ -32,7 +34,7 @@ UserSchema.methods.matchPassword = async function(enteredPass: string){
 
 UserSchema.methods.generateRefreshToken = async function() {
   const refreshToken = jwt.sign(
-    { id: this._id, role: this.role },
+    { id: this._id },
     JWT_SECRET,
     { expiresIn: '7d' } // Refresh token expires in 7 days
   );
@@ -42,6 +44,11 @@ UserSchema.methods.generateRefreshToken = async function() {
   return refreshToken;
 }
 
+//get Role
+UserSchema.methods.getRole = async function(): Promise<IRole | null> {
+  const role = await Role.findById(this.role).exec();
+  return role;
+}
 UserSchema.methods.invalidateRefreshToken = async function() {
   this.refreshToken = undefined;
   this.refreshTokenExpiry = undefined;

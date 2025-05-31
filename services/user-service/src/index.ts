@@ -11,7 +11,7 @@ const PORT = process.env.PORT ?? 4001;
 
 app.use(express.json());
 
-app.use('/api/user', userRoutes);
+app.use('/', userRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.send({ message: 'User service is healthy' });
@@ -20,8 +20,8 @@ app.get('/api/health', (req, res) => {
 // Connect to Mongo and start server
 const start = async () => {
   await dbConnect();
-
-  await InitializeBroker();
+  
+  // await InitializeBroker();
   app.listen(PORT, () => {
     console.log(`🚀 User Service running on port ${PORT}`);
   });

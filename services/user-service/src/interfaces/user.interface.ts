@@ -1,4 +1,5 @@
 import mongoose, { Document } from "mongoose";
+import { IRole } from "../interfaces";
 
 export interface IUser extends Document {
     name: string;
@@ -10,4 +11,5 @@ export interface IUser extends Document {
     matchPassword: (enteredPass: string) => Promise<boolean>;
     generateRefreshToken: () => Promise<string>;
     invalidateRefreshToken: () => Promise<void>;
+    getRole: () => Promise<IRole | null>;
 }

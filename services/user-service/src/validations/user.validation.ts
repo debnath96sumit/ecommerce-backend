@@ -1,5 +1,5 @@
 import joi from 'joi';
-
+import { z } from 'zod';
 export const userRegisterSchema = joi.object({
     name: joi.string().min(3).max(30).required().messages({
         'string.base': 'Name should be a type of text',
@@ -30,3 +30,8 @@ export const userRegisterSchema = joi.object({
         'any.required': 'Password is a required field',
     }),
 })
+
+export const loginSchema = z.object({
+    email: z.string().email({ message: 'Invalid email address' }),
+    password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+});
