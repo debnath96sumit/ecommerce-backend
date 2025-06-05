@@ -20,7 +20,8 @@
     "jsonwebtoken": "^9.0.2",
     "kafkajs": "^2.2.4",
     "mongoose": "^8.13.2",
-    "zod": "^3.25.42"
+    "zod": "^3.25.42",
+    "google-auth-library": "^9.15.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

@@ -1,13 +1,18 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
 import { userRegisterSchema } from '../validations/user.validation';
-import { JWT_SECRET } from '../config';
+import { GOOGLE_CLIENT_ID, JWT_SECRET } from '../config';
 import jwt from 'jsonwebtoken';
 import { AuthenticatedRequest } from '../interfaces';
 import { UserRepository } from '../repositories/user.repository';
+import { OAuth2Client } from 'google-auth-library';
+import { Role } from '../models/Role';
+
 
 class UserController {
     private readonly userRepo: UserRepository;
+    private readonly client = new OAuth2Client(GOOGLE_CLIENT_ID);
+
     constructor() {
         this.userRepo = new UserRepository();
     }
@@ -47,6 +52,78 @@ class UserController {
                 return;
             }
             
+            const accessToken = jwt.sign(
+                {
+                    id: user._id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                },
+                JWT_SECRET,
+                { expiresIn: '15m' }
+            );
+
+            const refreshToken = await user.generateRefreshToken();
+
+            res.status(200).json({
+                message: 'Login successful',
+                user,
+                accessToken,
+                refreshToken
+            });
+        } catch (error: any) {
+            res.status(500).json({ message: 'Error logging in', error: error.message });
+        }
+    }
+    public googleSignIn = async (req: Request, res: Response) => {
+        const { token } = req.body;
+        if (!token) {
+            res.status(400).json({ message: 'Google token is required' });
+            return;
+        }
+        try {
+            const ticket = await this.client.verifyIdToken({
+                idToken: token,
+                audience: GOOGLE_CLIENT_ID,
+            });
+
+            const payload = ticket.getPayload();
+            if (!payload) {
+                res.status(400).json({ message: 'Invalid Google token' });
+                return;
+            }
+
+            const { sub:googleId, email, name, picture } = payload;
+
+            if (!email) {
+                res.status(400).json({ message: 'Google account does not have an email address' });
+                return;
+            }
+
+            let user = await this.userRepo.findOne({ email });
+            
+            if (!user) {
+                const userRole = await Role.findOne({
+                    name: 'customer',
+                });
+                
+                if (!userRole) {
+                    res.status(400).json({ message: 'Role not found' });
+                    return;
+                }
+
+                const user_payload = {
+                    name,
+                    email,
+                    role: userRole.id,
+                    password: 'Password@123',
+                };
+                user = await this.userRepo.create(user_payload);
+                if (!user) {
+                    res.status(400).json({ message: 'Failed to create user' });
+                    return;
+                }
+            }
             const accessToken = jwt.sign(
                 {
                     id: user._id,

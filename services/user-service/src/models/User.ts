@@ -3,7 +3,7 @@ import { IUser } from "../interfaces/user.interface";
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from "../config";
-import Role from './Role';
+import { Role } from './Role';
 import { IRole } from '../interfaces/role.interface';
 
 const UserSchema = new Schema<IUser>(
