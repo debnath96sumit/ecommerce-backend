@@ -1,0 +1,63 @@
+import mongoose, { Document } from 'mongoose';
+
+export interface IProduct extends Document {
+  name: string;
+  description: string;
+  shortDescription?: string;
+  price: number;
+  compareAtPrice?: number;
+  costPrice?: number;
+  sku: string;
+  barcode?: string;
+  category: mongoose.Types.ObjectId;
+  subcategory?: mongoose.Types.ObjectId;
+  brand?: string;
+  tags: string[];
+  images: {
+    url: string;
+    alt: string;
+    isPrimary: boolean;
+  }[];
+  inventory: {
+    quantity: number;
+    reserved: number;
+    lowStockThreshold: number;
+    trackQuantity: boolean;
+  };
+  variants?: {
+    name: string;
+    options: {
+      name: string;
+      value: string;
+      price?: number;
+      sku?: string;
+      inventory?: number;
+    }[];
+  }[];
+  seo: {
+    metaTitle?: string;
+    metaDescription?: string;
+    slug: string;
+  };
+  specifications: {
+    key: string;
+    value: string;
+  }[];
+  weight?: number;
+  dimensions?: {
+    length: number;
+    width: number;
+    height: number;
+    unit: string;
+  };
+  isActive: boolean;
+  isFeatured: boolean;
+  isDigital: boolean;
+  rating: {
+    average: number;
+    count: number;
+  };
+  createdBy: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}

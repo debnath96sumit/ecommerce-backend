@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import User from '../models/User';
 import { userRegisterSchema } from '../validations/user.validation';
 import { GOOGLE_CLIENT_ID, JWT_SECRET } from '../config';
 import jwt from 'jsonwebtoken';
@@ -17,22 +16,26 @@ class UserController {
         this.userRepo = new UserRepository();
     }
 
-    public async createUser(req: Request, res: Response) {
+    public createUser = async (req: Request, res: Response) => {
         const { error, value } = userRegisterSchema.validate(req.body);
         if (error) {
             res.status(400).json({ message: error.details[0].message });
             return;
         }
         try {
-            const existUser = await User.findOne({ email: value.email }).exec();
+            const existUser = await this.userRepo.findOne({ email: value.email });
             if (existUser) {
                 res.status(400).json({ message: 'User already exists' });
                 return;
             }
-            const user = new User(value);
-            await user.save();
+            const newUser = await this.userRepo.create(value);
 
-            res.status(201).json({ message: 'User created successfully', user });
+            if (newUser) {
+                res.status(201).json({ message: 'User registered successfully', data: newUser });
+                return;
+            }
+            res.status(500).json({ message: 'Failed to registerd', data: null });
+            return;
         } catch (error: any) {
             res.status(500).json({ message: 'Error creating user', error: error.message });
         }
@@ -51,7 +54,7 @@ class UserController {
                 res.status(400).json({ message: 'Invalid email or password' });
                 return;
             }
-            
+
             const accessToken = jwt.sign(
                 {
                     id: user._id,
@@ -93,7 +96,7 @@ class UserController {
                 return;
             }
 
-            const { sub:googleId, email, name, picture } = payload;
+            const { sub: googleId, email, name, picture } = payload;
 
             if (!email) {
                 res.status(400).json({ message: 'Google account does not have an email address' });
@@ -101,12 +104,12 @@ class UserController {
             }
 
             let user = await this.userRepo.findOne({ email });
-            
+
             if (!user) {
                 const userRole = await Role.findOne({
                     name: 'customer',
                 });
-                
+
                 if (!userRole) {
                     res.status(400).json({ message: 'Role not found' });
                     return;
@@ -180,7 +183,7 @@ class UserController {
                 return;
             }
             console.log("user", user);
-            
+
             const accessToken = jwt.sign(
                 {
                     id: user._id,
@@ -206,7 +209,7 @@ class UserController {
         }
     }
 
-    public async logout(req: Request, res: Response) {
+    public logout = async (req: Request, res: Response) => {
         try {
             const { refreshToken } = req.body;
             if (!refreshToken) {
@@ -215,10 +218,10 @@ class UserController {
             }
 
             const decoded = jwt.verify(refreshToken, JWT_SECRET) as { id: string };
-            const user = await User.findById(decoded.id);
+            const user = await this.userRepo.findById(decoded.id);
 
             if (!user) {
-                res.status(400).json({ message: 'User not found' });
+                res.status(404).json({ message: 'User not found' });
                 return;
             }
 
