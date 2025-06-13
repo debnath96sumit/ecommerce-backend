@@ -34,7 +34,8 @@ const CategorySchema = new Schema<ICategory>({
     default: 0 
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  versionKey: false
 });
 
 export const Category = mongoose.model<ICategory>('Category', CategorySchema);
