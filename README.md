@@ -4,7 +4,7 @@
 
 ```text
 docker compose run --rm gateway npm install
-docker compose run --rm gateway npm build
+docker compose run --rm gateway npm run build
 ```
 
 ## User Service
