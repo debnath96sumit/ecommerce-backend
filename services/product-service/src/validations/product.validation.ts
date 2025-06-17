@@ -7,7 +7,13 @@ export const productSchema = z.object({
     .number({ invalid_type_error: 'Price must be a number' })
     .positive({ message: 'Price must be greater than 0' }),
   category: z.string().min(1, { message: "Category is required" }),
-  image: z.string().url({ message: "Invalid image URL" }).optional(),
+  images: z.array(
+    z.object({
+      url: z.string().min(1, { message: 'Image URL is required' }),
+      alt: z.string().optional(),
+      isPrimary: z.boolean().optional(),
+    })
+  ),
   stock: z
     .number({ invalid_type_error: 'Stock must be a number' })
     .int()

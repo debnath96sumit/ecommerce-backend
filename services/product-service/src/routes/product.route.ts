@@ -6,6 +6,6 @@ import { productSchema } from '../validations/product.validation';
 
 const router = express.Router();
 
-router.post('/login', verifyToken, validate(productSchema),  ProductController.addProduct );
+router.post('/add', verifyToken, validate(productSchema),  ProductController.addProduct );
 
 export default router;
