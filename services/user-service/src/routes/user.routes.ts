@@ -1,6 +1,6 @@
 import express, {Request, Response, NextFunction} from 'express';
 import UserController from '../controllers/user.controller';
-import { verifyToken } from '../middleware/auth.middleware';
+import { verifyTokenWithRole } from '../middleware/auth.middleware';
 import { validate, validateRefreshToken } from '../middleware/validate';
 import { loginSchema } from '../validations/user.validation';
 
@@ -11,6 +11,6 @@ router.post('/login', validate(loginSchema),  UserController.login);
 router.post('/google-signin',  UserController.googleSignIn);
 router.post('/refresh-token', validateRefreshToken , UserController.refreshToken);
 router.post('/logout', UserController.logout);
-router.get('/getProfile', verifyToken, UserController.getProfile);
+router.get('/getProfile', verifyTokenWithRole(), UserController.getProfile);
 
 export default router;
