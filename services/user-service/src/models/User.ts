@@ -55,5 +55,4 @@ UserSchema.methods.invalidateRefreshToken = async function() {
   await this.save();
 }
 
-const User = mongoose.model<IUser>('User', UserSchema);
-export default User;
+export const User = mongoose.model<IUser>('User', UserSchema);
