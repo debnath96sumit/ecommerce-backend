@@ -14,7 +14,6 @@ const CategorySchema = new Schema<ICategory>({
   },
   slug: { 
     type: String, 
-    required: true, 
     unique: true, 
     lowercase: true 
   },
@@ -29,13 +28,15 @@ const CategorySchema = new Schema<ICategory>({
     type: Boolean, 
     default: true 
   },
-  sortOrder: { 
-    type: Number, 
-    default: 0 
-  }
 }, {
   timestamps: true,
   versionKey: false
 });
 
+
+//generate slug from name
+CategorySchema.pre('save', function(next) {
+  this.slug = this.name.toLowerCase().replace(/ /g, '-');
+  next();
+})
 export const Category = mongoose.model<ICategory>('Category', CategorySchema);
