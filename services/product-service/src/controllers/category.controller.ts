@@ -11,6 +11,14 @@ class CategoryController {
 
   public addCategory = async (req: AuthenticatedRequest, res: Response) => {
     try {
+      const checkCategory = await this.categoryRepo.findOne({
+        name: req.body.name
+      })
+
+      if (checkCategory) {
+        res.status(400).json({ message: "Category with this name already exists" });
+        return;
+      }
       const catData: CreateCategoryInput = {
         name: req.body.name,
         description: req.body.description,
