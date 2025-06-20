@@ -119,11 +119,6 @@ const ProductSchema = new Schema<IProduct>({
   //   average: { type: Number, default: 0, min: 0, max: 5 },
   //   count: { type: Number, default: 0, min: 0 }
   // },
-  // createdBy: { 
-  //   type: Schema.Types.ObjectId, 
-  //   ref: 'User', 
-  //   required: true 
-  // }
   name: { type: String, required: true, index: true },
   description: { type: String, required: true },
   price: { type: Number, required: true, index: true },
@@ -139,6 +134,11 @@ const ProductSchema = new Schema<IProduct>({
   }],
   stock: { type: Number, default: 0 },
   isFeatured: { type: Boolean, default: false },
+  vendor_id: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
+  },
   status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
 }, {
   timestamps: true,

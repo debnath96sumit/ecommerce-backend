@@ -57,7 +57,6 @@ import mongoose, { Document } from 'mongoose';
 //     average: number;
 //     count: number;
 //   };
-//   createdBy: mongoose.Types.ObjectId;
 //   createdAt: Date;
 //   updatedAt: Date;
 // }
@@ -74,5 +73,6 @@ export interface IProduct extends Document {
   }[];
   stock: number;
   isFeatured?: boolean;
+  vendor_id: mongoose.Types.ObjectId;
   status: 'Active' | 'Inactive';
 }

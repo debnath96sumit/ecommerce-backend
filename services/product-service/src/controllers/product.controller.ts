@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { IProduct } from '../interfaces';
+import { Response } from 'express';
+import { AuthenticatedRequest, IProduct } from '../interfaces';
 import { ProductRepository } from '../repositories/product.repository';
 
 
@@ -10,10 +10,15 @@ class UserController {
         this.productRepo = new ProductRepository();
     }
 
-    public addProduct = async (req: Request, res: Response) => {
+    public addProduct = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const productData: IProduct = req.body;
-
+      const vendor_id = req.user?.id;
+      if (!vendor_id) {
+        res.status(401).json({ message: 'Unauthorized' });
+        return;
+      }
+      productData.vendor_id = vendor_id;
       const newProduct = await this.productRepo.create(productData);
 
       if (newProduct) {
