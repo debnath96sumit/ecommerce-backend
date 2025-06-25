@@ -4,15 +4,15 @@ import { IWishlist } from "../interfaces";
 
 const WishlistSchema = new Schema<IWishlist>(
   {
-    user: {
+    user_id: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
       unique: true,
     },
-    products: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+    products: [{ type: Schema.Types.ObjectId }],
   },
-  { timestamps: true }
+  { timestamps: true, versionKey:false }
 );
 
 export const Wishlist = mongoose.model<IWishlist>("Wishlist", WishlistSchema);
