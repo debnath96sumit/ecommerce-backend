@@ -21,7 +21,7 @@ app.get('/api/health', (req, res) => {
 const start = async () => {
   await dbConnect();
   
-  // await InitializeBroker();
+  await InitializeBroker();
   app.listen(PORT, () => {
     console.log(`🚀 User Service running on port ${PORT}`);
   });

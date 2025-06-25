@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { WishlistRepository } from "../repositories/wishlist.repository";
 import { AuthenticatedRequest } from '../interfaces';
 import { isValidObjectId } from "mongoose";
+import { sendEvent } from "../utils/SendEvent";
 
 
 class WishlistController {
@@ -14,9 +15,12 @@ class WishlistController {
   public getMyWishlist = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const user_id = req.user?.id;
-        const wishlist = await this.wishlistRepo.getAll({
-            user_id
-        })
+        const wishlist = await this.wishlistRepo.findOne({ user_id });
+        // if(wishlist && wishlist.products.length > 0){
+        //     const product_details = await sendEvent({
+        //         publishData
+        //     })
+        // }
         res.status(200).json({ message: "Wishlist fetched", data: wishlist });
         return;
     } catch (error) {

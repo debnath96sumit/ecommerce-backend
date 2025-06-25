@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import dbConnect from './config/dbConnect';
 import productRoutes from './routes/product.route';
 import categoryRoutes from './routes/category.route';
-
+import { InitializeBroker } from './services/BrokerService';
 dotenv.config();
 
 const app = express();
@@ -22,7 +22,7 @@ app.get('/api/health', (req, res) => {
 // Connect to Mongo and start server
 const start = async () => {
   await dbConnect();
-
+  await InitializeBroker();
   app.listen(PORT, () => {
     console.log(`🚀 Product Service running on port ${PORT}`);
   });
