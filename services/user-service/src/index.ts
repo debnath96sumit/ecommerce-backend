@@ -19,8 +19,10 @@ app.get('/api/health', (req, res) => {
 
 // Connect to Mongo and start server
 const start = async () => {
+  // Connect to Mongo
   await dbConnect();
-  
+
+  //initialize broker
   await InitializeBroker();
   app.listen(PORT, () => {
     console.log(`🚀 User Service running on port ${PORT}`);

@@ -5,7 +5,8 @@ export enum UserEvent {
 }
   
   export type TOPIC_TYPE =
-    | "UserEvents";
+    | "UserEvents"
+    | "ProductEvents";
   
   export interface MessageType {
     headers?: Record<string, any>;

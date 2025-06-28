@@ -3,6 +3,8 @@ import { WishlistRepository } from "../repositories/wishlist.repository";
 import { AuthenticatedRequest } from '../interfaces';
 import { isValidObjectId } from "mongoose";
 import { sendEvent } from "../utils/SendEvent";
+import { UserEvent } from "../types"
+import { productsDetailsMap } from "../events/EventDataStore";
 
 
 class WishlistController {
@@ -16,11 +18,28 @@ class WishlistController {
     try {
         const user_id = req.user?.id;
         const wishlist = await this.wishlistRepo.findOne({ user_id });
-        // if(wishlist && wishlist.products.length > 0){
-        //     const product_details = await sendEvent({
-        //         publishData
-        //     })
-        // }
+        if(wishlist && wishlist.products.length > 0){
+            const product_details = await sendEvent({
+                publishData: {
+                    topic: "ProductEvents",
+                    event: UserEvent.GET_PRODUCTS_REQUEST,
+                    message: {
+                        product_ids: wishlist.products,
+                        topic : 'UserEvents',
+                        selectedFields: ['name', 'price']
+                    }
+                },
+                waitForResponse: {
+                    map : productsDetailsMap,
+                    expectedKeys: wishlist.products.map((id) => id.toString())
+                }
+            })
+
+            if(product_details){
+                wishlist.products = wishlist.products.map((id) => productsDetailsMap.get(id.toString()));
+            }
+            
+        }
         res.status(200).json({ message: "Wishlist fetched", data: wishlist });
         return;
     } catch (error) {

@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   gateway:
     container_name: api-gateway
@@ -16,8 +15,7 @@ services:
       product-service:
         condition: service_healthy
     volumes:
-      - ./gateway:/app
-      - /app/node_modules
+      - ./gateway/src:/app/src
     networks:
       - ecommerce-net
   
@@ -33,7 +31,7 @@ services:
     depends_on:
       - mongo
     volumes:
-      - ./services/user-service:/app
+      - ./services/user-service/src:/app/src
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://user-service:4001/api/health"]
       interval: 10s
@@ -55,7 +53,7 @@ services:
     depends_on:
       - mongo
     volumes:
-      - ./services/product-service:/app
+      - ./services/product-service/src:/app/src
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://product-service:4002/api/health"]
       interval: 10s
