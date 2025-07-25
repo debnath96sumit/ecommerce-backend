@@ -7,6 +7,37 @@ import { loginSchema } from '../validations/user.validation';
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * /register:
+ *   post:
+ *     summary: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - role
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Validation error
+ */
 router.post('/register', UserController.createUser);
 router.post('/login', validate(loginSchema),  UserController.login);
 router.post('/google-signin',  UserController.googleSignIn);

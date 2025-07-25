@@ -5,6 +5,7 @@ import dbConnect from './config/dbConnect';
 import productRoutes from './routes/product.route';
 import categoryRoutes from './routes/category.route';
 import { InitializeBroker } from './services/BrokerService';
+import { setupSwagger } from './docs/swagger';
 dotenv.config();
 
 const app = express();
@@ -18,6 +19,7 @@ app.use('/category', categoryRoutes);
 app.get('/api/health', (req, res) => {
   res.send({ message: 'Product service is healthy' });
 });
+setupSwagger(app); // Enable Swagger at /api-docs
 
 // Connect to Mongo and start server
 const start = async () => {
