@@ -15,7 +15,7 @@ services:
       product-service:
         condition: service_healthy
     volumes:
-      - ./gateway/src:/app/src
+      - ./gateway:/app
     networks:
       - ecommerce-net
   
@@ -31,7 +31,7 @@ services:
     depends_on:
       - mongo
     volumes:
-      - ./services/user-service/src:/app/src
+      - ./services/user-service:/app
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://user-service:4001/api/health"]
       interval: 10s
@@ -53,7 +53,7 @@ services:
     depends_on:
       - mongo
     volumes:
-      - ./services/product-service/src:/app/src
+      - ./services/product-service:/app
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://product-service:4002/api/health"]
       interval: 10s
@@ -84,19 +84,24 @@ services:
       - ecommerce-net
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
-    depends_on:
-      - zookeeper
+    env_file:
+      - .env
     ports:
       - "9092:9092"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092" 
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://kafka:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID} 
+    depends_on:
+      - zookeeper
     networks:
       - ecommerce-net
 
