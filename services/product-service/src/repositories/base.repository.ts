@@ -22,4 +22,8 @@ export class BaseRepository<T extends Document>{
     async findById(id: string): Promise<T | null>{
         return await this.model.findById(id).exec();
     }
+
+    getModel(): Model<T> {
+        return this.model;
+    }
 }

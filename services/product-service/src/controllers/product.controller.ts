@@ -40,12 +40,93 @@ class ProductController {
 
   public listProducts = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const products = await this.productRepo.find({});
-      res.status(200).json({ message: "Products fetched successfully", data: products });
-      return;
+      const {
+        search,
+        category,
+        minPrice,
+        maxPrice,
+        inStock,
+        featured,
+        status,
+        page = 1,
+        limit = 10,
+        sortBy = 'createdAt',
+        sortOrder = 'desc'
+      } = req.query;
+
+      const filter: any = {};
+
+      if (search) {
+        filter.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } }
+        ];
+      }
+
+      if (category) {
+        filter.category = category;
+      }
+
+      if (minPrice || maxPrice) {
+        filter.price = {};
+        if (minPrice) filter.price.$gte = Number(minPrice);
+        if (maxPrice) filter.price.$lte = Number(maxPrice);
+      }
+
+      if (inStock === 'true') {
+        filter.stock = { $gt: 0 };
+      } else if (inStock === 'false') {
+        filter.stock = { $lte: 0 };
+      }
+
+      if (featured) {
+        filter.isFeatured = featured === 'true';
+      }
+      if (status) {
+        filter.status = status;
+      } else {
+        filter.status = 'Active';
+      }
+
+      const pageNumber = Math.max(1, parseInt(page as string) || 1);
+      const limitNumber = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
+      const skip = (pageNumber - 1) * limitNumber;
+      const sort: any = {};
+      sort[sortBy as string] = sortOrder === 'asc' ? 1 : -1;
+
+      const [products, total] = await Promise.all([
+        this.productRepo
+          .getModel()
+          .find(filter)
+          .populate('category', 'name')
+          .sort(sort)
+          .skip(skip)
+          .limit(limitNumber)
+          .lean(),
+        this.productRepo.getModel().countDocuments(filter)
+      ]);
+
+      const totalPages = Math.ceil(total / limitNumber);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          products,
+          pagination: {
+            total,
+            page: pageNumber,
+            limit: limitNumber,
+            totalPages
+          }
+        }
+      });
     } catch (error: any) {
-      res.status(500).json({ message: "Error fetching products", error: error.message });
-      return;
+      console.error('Error listing products:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching products',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   };
 
