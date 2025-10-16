@@ -11,6 +11,8 @@ const router = express.Router();
  * /category/add:
  *   post:
  *     summary: Create a new category
+ *     tags:
+ *       - Category
  *     requestBody:
  *       required: true
  *       content:
@@ -48,6 +50,8 @@ router.post('/add', verifyTokenWithRole(['admin']), validate(categoryCreateSchem
  * /category/get-all:
  *   get:
  *     summary: Get all categories
+ *     tags:
+ *       - Category
  *     responses:
  *       200:
  *         description: Successfully retrieved categories

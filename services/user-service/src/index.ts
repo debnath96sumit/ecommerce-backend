@@ -3,6 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import dbConnect from './config/dbConnect';
 import userRoutes from './routes/user.routes';
+import wishlistRoutes from './routes/wishlist.routes';
 import { setupSwagger } from './docs/swagger';
 import { InitializeBroker } from './services/BrokerService';
 dotenv.config();
@@ -13,6 +14,7 @@ const PORT = process.env.PORT ?? 4001;
 app.use(express.json());
 
 app.use('/', userRoutes);
+app.use('/wishlist', wishlistRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.send({ message: 'User service is healthy' });
@@ -28,6 +30,8 @@ const start = async () => {
   await InitializeBroker();
   app.listen(PORT, () => {
     console.log(`🚀 User Service running on port ${PORT}`);
+    console.log(`🚀 User Service Swagger http://localhost:${PORT}/api-docs`);
+
   });
 };
 

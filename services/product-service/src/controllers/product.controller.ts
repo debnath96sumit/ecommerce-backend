@@ -144,6 +144,30 @@ class ProductController {
       return;
     }
   };
+  public deleteProduct = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (!req.params.id || !isValidObjectId(req.params.id)) {
+        res.status(400).json({ message: "Product id is required" });
+        return;
+      }
+      const vendor_id = req.user?.id;
+      if (!vendor_id) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const product = await this.productRepo.findOne({ _id: req.params.id, vendor_id });
+      if(!product){
+        res.status(404).json({ message: "Product not found or you are not authorized to delete this product" });
+        return;
+      }
+      const deletedProduct = await this.productRepo.deleteById(product._id);
+      res.status(200).json({ message: "Product deleted successfully", data: deletedProduct });
+      return;
+    } catch (error: any) {
+      res.status(500).json({ message: "Error in delete product", error: error.message });
+      return;
+    }
+  };
 }
 
 export default new ProductController();

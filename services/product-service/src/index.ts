@@ -27,6 +27,7 @@ const start = async () => {
   await InitializeBroker();
   app.listen(PORT, () => {
     console.log(`🚀 Product Service running on port ${PORT}`);
+    console.log(`🚀 Product Service Swagger http://localhost:${PORT}/api-docs`);
   });
 };
 

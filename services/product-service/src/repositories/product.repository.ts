@@ -15,4 +15,6 @@ import { FilterQuery } from "mongoose";
     async findById(id: string): Promise<IProduct | null> {
         return Product.findById(id).populate('category').exec();
     }
+
+    
 }

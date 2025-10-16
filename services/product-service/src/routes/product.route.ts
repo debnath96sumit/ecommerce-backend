@@ -50,9 +50,11 @@ router.post('/add', verifyTokenWithRole(['vendor']), validate(productSchema), Pr
 
 /**
  * @openapi
- * /list:
+ * /product/list:
  *   get:
  *     summary: Get all products with search and filters
+ *     tags:
+ *       - Products
  *     parameters:
  *       - in: query
  *         name: search
@@ -133,13 +135,15 @@ router.post('/add', verifyTokenWithRole(['vendor']), validate(productSchema), Pr
  *       500:
  *         description: Server error
  */
-router.get('/list', ProductController.listProducts );
+router.get('/product/list', ProductController.listProducts );
 
 /**
  * @openapi
  * /product/details/{id}:
  *   get:
  *     summary: Get product details by ID
+ *     tags:
+ *       - Products
  *     parameters:
  *       - in: path
  *         name: id
@@ -161,5 +165,35 @@ router.get('/list', ProductController.listProducts );
  *         description: Product not found
  */
 router.get('/details/:id', ProductController.productDetails );
+/**
+ * @openapi
+ * /product/delete/{id}:
+ *   get:
+ *     summary: Delete product by ID
+ *     tags:
+ *       - Products
+ *     security:
+ *      - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Product ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully product deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 product:
+ *                   type: object
+ *       404:
+ *         description: Product not found
+ */
+router.post('/product/delete/:id',verifyTokenWithRole(['vendor']), ProductController.productDetails );
 
 export default router;

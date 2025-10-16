@@ -14,13 +14,10 @@ export const userRegisterSchema = joi.object({
         'string.email': 'Email must be a valid email',
         'any.required': 'Email is a required field',
     }),
-    role: joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .required()
-    .messages({
-      "string.empty": "Role is required.",
-      "string.pattern.base":
-        "Invalid role ID format. It should be a valid ObjectId.",
+    type: joi.string().valid('customer', 'vendor').required().messages({
+        'string.base': 'Type should be a type of text',
+        'any.only': 'Type must be either customer or vendor',
+        'any.required': 'Type is a required field',
     }),
     password: joi.string().min(6).max(30).required().messages({
         'string.base': 'Password should be a type of text',

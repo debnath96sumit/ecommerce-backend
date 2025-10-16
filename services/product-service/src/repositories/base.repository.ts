@@ -1,4 +1,4 @@
-import {Model, Document, UpdateQuery, FilterQuery} from 'mongoose';
+import {Model, Document, UpdateQuery, FilterQuery, Types} from 'mongoose';
 
 export class BaseRepository<T extends Document>{
     private readonly model: Model<T>;
@@ -25,5 +25,9 @@ export class BaseRepository<T extends Document>{
 
     getModel(): Model<T> {
         return this.model;
+    }
+
+    async deleteById(id: Types.ObjectId): Promise<T | null>{
+        return await this.model.findByIdAndDelete(id).exec();
     }
 }

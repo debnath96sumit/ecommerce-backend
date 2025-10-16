@@ -28,6 +28,16 @@ class UserController {
                 res.status(400).json({ message: 'User already exists' });
                 return;
             }
+            const userRole = await Role.findOne({
+                name: value.type,
+            });
+
+            if (!userRole) {
+                res.status(400).json({ message: 'Role not found' });
+                return;
+            }
+            value.role = userRole.id;
+            delete value.type;
             const newUser = await this.userRepo.create(value);
 
             if (newUser) {
