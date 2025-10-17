@@ -35,6 +35,7 @@ class ProductController {
       res
         .status(500)
         .json({ message: "Error adding product", error: error.message });
+      return;
     }
   };
 
@@ -127,6 +128,7 @@ class ProductController {
         message: 'Error fetching products',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
+      return;
     }
   };
 

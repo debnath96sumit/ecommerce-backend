@@ -38,6 +38,7 @@ docker compose run --rm gateway npm run build
 docker compose run --rm user-service npm install
 docker compose run --rm user-service npm run build
 ```
+
 ## Product Service
 
 ```text
@@ -45,6 +46,12 @@ docker compose run --rm product-service npm install
 docker compose run --rm product-service npm run build
 ```
 
+## Cart Service
+
+```text
+docker compose run --rm cart-service npm install
+docker compose run --rm cart-service npm run build
+```
 
 ## docker compose up -d --build
 ## docker compose -f docker-compose.dev.yml up -d --build

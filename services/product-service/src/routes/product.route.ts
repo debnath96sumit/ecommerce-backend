@@ -183,7 +183,7 @@ router.get('/details/:id', ProductController.productDetails );
  *           type: string
  *     responses:
  *       200:
- *         description: Successfully product deleted
+ *         description: product deleted successfully
  *         content:
  *           application/json:
  *             schema:
@@ -194,6 +194,6 @@ router.get('/details/:id', ProductController.productDetails );
  *       404:
  *         description: Product not found
  */
-router.post('/product/delete/:id',verifyTokenWithRole(['vendor']), ProductController.productDetails );
+router.get('/product/delete/:id',verifyTokenWithRole(['vendor']), ProductController.deleteProduct );
 
 export default router;
