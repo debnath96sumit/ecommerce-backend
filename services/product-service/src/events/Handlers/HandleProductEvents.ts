@@ -1,6 +1,6 @@
 import { MessageBroker } from "../../utils/broker/Kafka";
 import { MessageType, ProductEvent } from "../../types";
-import {Product} from "../../models/Product";
+import { Product } from "../../models/Product";
 import { IProduct } from "../../interfaces";
 
 const getProductDetails = async (
@@ -42,8 +42,22 @@ export const handleProductDetailsRequest = async (message: MessageType) => {
       console.log(`productDetailsResponse sent for product_id: ${product_ids}`);
     } else {
       console.error(`No product details found for product_id: ${product_ids}`);
+      await MessageBroker.publish({
+        topic,
+        event: ProductEvent.GET_PRODUCTS_RESPONSE,
+        message: {
+          products: {}
+        },
+      })
     }
   } catch (error: any) {
     console.error(`Error handling productDetailsRequest: ${error.message}`);
+    await MessageBroker.publish({
+      topic,
+      event: ProductEvent.GET_PRODUCTS_RESPONSE,
+      message: {
+        products: {}
+      },
+    })
   }
 };

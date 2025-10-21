@@ -5,7 +5,7 @@ import {
 import { handleProductDetailsRequest } from "./Handlers/HandleProductEvents";
   
   export const HandleProductEvent = async (message: MessageType) => {
-    console.log(`UserEvent received`, message);
+    console.log(`Event received`, message);
     switch (message.event) {
       case ProductEvent.GET_PRODUCTS_REQUEST:
         console.log("Fetch product event received", message.data);

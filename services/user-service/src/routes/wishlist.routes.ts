@@ -6,7 +6,7 @@ const router = express.Router();
 
 /**
  * @openapi
- * /list:
+ * /wishlist/list:
  *   get:
  *     summary: Get logged-in user wishlist
  *     tags:
@@ -34,7 +34,7 @@ router.get('/list', verifyTokenWithRole(['customer']), WishlistController.getMyW
 
 /**
  * @openapi
- * /add:
+ * /wishlist/add:
  *   post:
  *     summary: Add product to wishlist
  *     tags:
@@ -46,9 +46,9 @@ router.get('/list', verifyTokenWithRole(['customer']), WishlistController.getMyW
  *           schema:
  *             type: object
  *             required:
- *               - productId
+ *               - product_id
  *             properties:
- *               productId:
+ *               product_id:
  *                 type: string
  *     responses:
  *       200:
@@ -60,7 +60,7 @@ router.post('/add', verifyTokenWithRole(['customer']), WishlistController.addToW
 
 /**
  * @openapi
- * /remove:
+ * /wishlist/remove:
  *   post:
  *     summary: Remove product from wishlist
  *     tags:
@@ -72,9 +72,9 @@ router.post('/add', verifyTokenWithRole(['customer']), WishlistController.addToW
  *           schema:
  *             type: object
  *             required:
- *               - productId
+ *               - product_id
  *             properties:
- *               productId:
+ *               product_id:
  *                 type: string
  *     responses:
  *       200:

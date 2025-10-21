@@ -1,7 +1,7 @@
 // src/app.ts
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import { PRODUCT_SERVICE_URL, USER_SERVICE_URL } from "./config";
+import { CART_SERVICE_URL, PRODUCT_SERVICE_URL, USER_SERVICE_URL } from "./config";
 import { authLimiter } from "./utils";
 const app = express();
 
@@ -24,5 +24,15 @@ const productServiceProxy = createProxyMiddleware({
   },
 });
 app.use("/api/product", productServiceProxy);
+
+// Proxy for cart-service
+const cartServiceProxy = createProxyMiddleware({
+  target: CART_SERVICE_URL,
+  changeOrigin: true,
+  pathRewrite: {
+    "^/api/cart": "",
+  },
+});
+app.use("/api/product", cartServiceProxy);
 
 export default app;

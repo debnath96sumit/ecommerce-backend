@@ -1,6 +1,6 @@
 import { Consumer, Producer } from "kafkajs";
 import { MessageBroker } from "../utils/broker/Kafka";
-import { HandleProductEvent } from "../events/ProductEvents";
+import { HandleCartEvent } from "../events/CartEvents";
 
 export const InitializeBroker = async (): Promise<void> => {
   const producer = await MessageBroker.connectProducer<Producer>();
@@ -13,5 +13,5 @@ export const InitializeBroker = async (): Promise<void> => {
     console.log("Consumer connected successfully");
   });
 
-  await MessageBroker.subscribe(HandleProductEvent, 'CartEvents');
+  await MessageBroker.subscribe(HandleCartEvent, 'CartEvents');
 };
