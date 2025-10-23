@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { WishlistRepository } from "../repositories/wishlist.repository";
 import { AuthenticatedRequest } from '../interfaces';
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId, Types } from "mongoose";
 import { sendEvent } from "../utils/SendEvent";
 import { UserEvent } from "../types"
 import { productsDetailsMap } from "../events/EventDataStore";
@@ -18,29 +18,43 @@ class WishlistController {
         try {
             const user_id = req.user?.id;
             const wishlist = await this.wishlistRepo.findOne({ user_id });
-            if (wishlist && wishlist.products.length > 0) {
+            
+            if (!wishlist) {
+                res.status(200).json({ message: "Wishlist fetched", data: null });
+                return;
+            }
+            
+            const wishlistData = wishlist.toObject();
+            
+            if (wishlistData.products && wishlistData.products.length > 0) {
                 const product_details = await sendEvent({
                     publishData: {
                         topic: "ProductEvents",
                         event: UserEvent.GET_PRODUCTS_REQUEST,
                         message: {
-                            product_ids: wishlist.products,
+                            product_ids: wishlistData.products,
                             topic: 'UserEvents',
                             selectedFields: ['name', 'price']
                         }
                     },
                     waitForResponse: {
                         map: productsDetailsMap,
-                        expectedKeys: wishlist.products.map((id) => id.toString())
+                        expectedKeys: wishlistData.products.map((id: Types.ObjectId) => id.toString())
                     }
-                })
-                if (product_details) {
-                    wishlist.products = wishlist.products
-                        .map(id => product_details.get(id.toString()))
+                });
+                
+                if (product_details && product_details.size > 0) {
+                    wishlistData.products = wishlistData.products
+                        .map((id: Types.ObjectId) => {
+                            const productDoc = product_details.get(id.toString());
+                            if (!productDoc) return null;
+                            return productDoc.toObject ? productDoc.toObject() : productDoc;
+                        })
                         .filter(Boolean);
                 }
             }
-            res.status(200).json({ message: "Wishlist fetched", data: wishlist });
+            
+            res.status(200).json({ message: "Wishlist fetched", data: wishlistData });
             return;
         } catch (error) {
             console.log("error", error);

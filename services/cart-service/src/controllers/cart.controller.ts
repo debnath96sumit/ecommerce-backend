@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AuthenticatedRequest, ICart, ICartInput } from "../interfaces";
+import { AuthenticatedRequest, ICart, ICartInput, ICartItem } from "../interfaces";
 import { CartRepository } from "../repositories/cart.repository";
 import { isValidObjectId, Types } from "mongoose";
 import { sendEvent } from "../utils/SendEvent";
@@ -21,35 +21,43 @@ class CartController {
         res.status(404).json({ success: false, message: "Cart not found" });
         return;
       }
-      if (cart && cart.items.length > 0) {
+      const cartData = cart.toObject();
+      
+      if (cartData.items && cartData.items.length > 0) {
         const product_details = await sendEvent({
           publishData: {
             topic: "ProductEvents",
             event: CartEvent.GET_PRODUCTS_REQUEST,
             message: {
-              product_ids: cart.items.map((item) => item.product_id),
-              topic: 'UserEvents',
+              product_ids: cartData.items.map((item: ICartItem) => item.product_id),
+              topic: 'CartEvents',
               selectedFields: ['name', 'price']
             }
           },
           waitForResponse: {
             map: productsDetailsMap,
-            expectedKeys: cart.items.map((item) => item.product_id.toString())
+            expectedKeys: cartData.items.map((item: ICartItem) => item.product_id.toString())
           }
-        })
+        });
+        
         if (product_details) {
-          cart.items = cart.items.map((item) => {
-            const product = product_details[item.product_id.toString()];
+          cartData.items = cartData.items.map((item: ICartItem) => {
+            const productDoc = product_details.get(item.product_id.toString());
+            if (!productDoc) return item;
+
+            const product = productDoc.toObject ? productDoc.toObject() : productDoc;
+
+            console.log('product', product);
+
             return {
               ...item,
-              name: product.name,
-              price: product.price,
+              product
             };
-          })
+          });
         }
-
       }
-      res.status(200).json({ success: true, data: cart });
+
+      res.status(200).json({ success: true, data: cartData });
     } catch (error) {
       res.status(500).json({ success: false, message: "Internal server error" });
     }
@@ -81,7 +89,7 @@ class CartController {
       });
 
       console.log('product_respppppppppppp', product_resp);
-      
+
       const product_details = product_resp?.get(product_id.toString());
       if (!product_details) {
         res.status(404).json({ success: false, message: 'Product not found' });

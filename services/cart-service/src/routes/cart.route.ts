@@ -50,7 +50,7 @@ router.get('/cart/list', verifyTokenWithRole(['customer']), CartController.getMy
  *         application/json:
  *           schema:
  *             type: object
-  *             required:
+ *             required:
  *               - product_id
  *               - quantity
  *             properties:

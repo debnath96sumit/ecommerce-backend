@@ -4,6 +4,7 @@ export interface ICartItem {
   product_id: Types.ObjectId;
   quantity: number;
   price: number;
+  product?: any;
 }
 
 export interface ICart extends Document {
