@@ -52,6 +52,12 @@ docker compose run --rm product-service npm run build
 docker compose run --rm cart-service npm install
 docker compose run --rm cart-service npm run build
 ```
+## Order Service
+
+```text
+docker compose run --rm order-service npm install
+docker compose run --rm order-service npm run build
+```
 
 ## docker compose up -d --build
 ## docker compose -f docker-compose.dev.yml up -d --build

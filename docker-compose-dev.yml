@@ -84,7 +84,31 @@ services:
     command: npm run dev 
     networks:
       - ecommerce-net
-      
+  
+  order-service:
+    container_name: ecommerce-order-service
+    build: 
+      context: ./services/order-service
+      dockerfile: Dockerfile
+    ports:
+      - '4004:4004'
+    env_file:
+      - ./services/order-service/.env
+    depends_on:
+      mongo:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./services/order-service:/app
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://order-service:4004/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: npm run dev 
+    networks:
+      - ecommerce-net
   mongo:
     image: mongo
     container_name: mongo
